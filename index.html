@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="MiFinanza" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <title>MiFinanza</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=DM+Mono:wght@400;500&display=swap');
+
+    :root {
+      --bg: #f7f6f3;
+      --surface: #ffffff;
+      --surface2: #f0ede8;
+      --border: rgba(0,0,0,0.08);
+      --border-md: rgba(0,0,0,0.14);
+      --text: #1a1917;
+      --text2: #6b6860;
+      --text3: #9e9b95;
+      --green: #0f6e56;
+      --green-bg: #e1f5ee;
+      --red: #993c1d;
+      --red-bg: #faece7;
+      --blue: #185fa5;
+      --blue-bg: #e6f1fb;
+      --amber: #854f0b;
+      --amber-bg: #faeeda;
+      --radius: 14px;
+      --radius-sm: 9px;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bot: env(safe-area-inset-bottom, 0px);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #111110;
+        --surface: #1c1c1a;
+        --surface2: #252523;
+        --border: rgba(255,255,255,0.08);
+        --border-md: rgba(255,255,255,0.14);
+        --text: #f0ede8;
+        --text2: #9e9b95;
+        --text3: #6b6860;
+        --green: #5dcaa5;
+        --green-bg: #04342c;
+        --red: #f0997b;
+        --red-bg: #4a1b0c;
+        --blue: #85b7eb;
+        --blue-bg: #042c53;
+        --amber: #ef9f27;
+        --amber-bg: #412402;
+      }
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      padding-top: var(--safe-top);
+      padding-bottom: calc(var(--safe-bot) + 16px);
+    }
+
+    .app {
+      max-width: 430px;
+      margin: 0 auto;
+      padding: 20px 16px 32px;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .header-title {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text2);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .header-date {
+      font-size: 13px;
+      color: var(--text3);
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* Balance cards */
+    .balance-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .balance-card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+    }
+    .balance-card.main {
+      grid-column: 1 / -1;
+      padding: 20px;
+      text-align: center;
+    }
+    .card-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text3);
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .card-amount {
+      font-family: 'DM Mono', monospace;
+      font-size: 34px;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1;
+    }
+    .card-amount.sm {
+      font-size: 22px;
+    }
+    .card-amount.pos { color: var(--green); }
+    .card-amount.neg { color: var(--red); }
+
+    .proj-diff {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-family: 'DM Mono', monospace;
+    }
+    .proj-diff.pos { background: var(--green-bg); color: var(--green); }
+    .proj-diff.neg { background: var(--red-bg); color: var(--red); }
+    .proj-diff.zero { background: var(--surface2); color: var(--text3); }
+
+    /* Stat mini cards */
+    .stat-label { font-size: 11px; color: var(--text3); letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 6px; }
+    .stat-val { font-family: 'DM Mono', monospace; font-size: 16px; font-weight: 500; }
+    .stat-val.inc { color: var(--green); }
+    .stat-val.exp { color: var(--red); }
+    .stat-val.pinc { color: var(--blue); }
+    .stat-val.pexp { color: var(--amber); }
+
+    /* Mode tabs */
+    .tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+    .tab-btn {
+      padding: 9px 6px;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: 'DM Sans', sans-serif;
+      border: 0.5px solid var(--border-md);
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      color: var(--text2);
+      cursor: pointer;
+      transition: all 0.13s;
+      line-height: 1;
+    }
+    .tab-btn.a-income  { background: var(--green-bg);  color: var(--green);  border-color: var(--green);  }
+    .tab-btn.a-expense { background: var(--red-bg);    color: var(--red);    border-color: var(--red);    }
+    .tab-btn.a-pincome { background: var(--blue-bg);   color: var(--blue);   border-color: var(--blue);   }
+    .tab-btn.a-pexpense{ background: var(--amber-bg);  color: var(--amber);  border-color: var(--amber);  }
+
+    /* Input area */
+    .input-section {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+    .input-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .input-row:last-child { margin-bottom: 0; }
+    input[type="text"], input[type="number"] {
+      flex: 1;
+      padding: 10px 12px;
+      font-size: 14px;
+      font-family: 'DM Sans', sans-serif;
+      border: 0.5px solid var(--border-md);
+      border-radius: var(--radius-sm);
+      background: var(--surface2);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.12s;
+    }
+    input[type="number"] { font-family: 'DM Mono', monospace; max-width: 120px; }
+    input:focus { border-color: var(--text3); }
+    input::placeholder { color: var(--text3); }
+    .add-btn {
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      font-family: 'DM Sans', sans-serif;
+      border: 0.5px solid var(--border-md);
+      border-radius: var(--radius-sm);
+      background: var(--text);
+      color: var(--bg);
+      cursor: pointer;
+      transition: opacity 0.12s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .add-btn:active { transform: scale(0.96); opacity: 0.85; }
+
+    /* Transaction list */
+    .list-section {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .list-header {
+      padding: 12px 14px 10px;
+      border-bottom: 0.5px solid var(--border);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text3);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .list-count {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      background: var(--surface2);
+      padding: 2px 7px;
+      border-radius: 20px;
+    }
+    .tx-list { max-height: 220px; overflow-y: auto; }
+    .tx-item {
+      display: flex;
+      align-items: center;
+      padding: 11px 14px;
+      border-bottom: 0.5px solid var(--border);
+      gap: 10px;
+      transition: background 0.1s;
+    }
+    .tx-item:last-child { border-bottom: none; }
+    .tx-item:active { background: var(--surface2); }
+    .tx-name { flex: 1; font-size: 14px; color: var(--text); }
+    .tx-amount {
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      font-weight: 500;
+      min-width: 80px;
+      text-align: right;
+    }
+    .tx-del {
+      font-size: 16px;
+      color: var(--text3);
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 4px;
+      line-height: 1;
+      transition: color 0.1s;
+    }
+    .tx-del:active { color: var(--red); }
+    .empty-msg {
+      text-align: center;
+      font-size: 13px;
+      color: var(--text3);
+      padding: 24px;
+    }
+
+    /* Clear all button */
+    .clear-btn {
+      margin-top: 20px;
+      width: 100%;
+      padding: 10px;
+      font-size: 13px;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text3);
+      background: transparent;
+      border: 0.5px solid var(--border-md);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+    .clear-btn:active { color: var(--red); border-color: var(--red); }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <span class="header-title">MiFinanza</span>
+    <span class="header-date" id="header-date"></span>
+  </div>
+
+  <!-- Balance actual -->
+  <div class="balance-grid">
+    <div class="balance-card main">
+      <div class="card-label">Balance actual</div>
+      <div class="card-amount" id="current-balance">Bs 0.00</div>
+    </div>
+    <div class="balance-card">
+      <div class="stat-label">Ingresos</div>
+      <div class="stat-val inc" id="total-income">Bs 0.00</div>
+    </div>
+    <div class="balance-card">
+      <div class="stat-label">Gastos</div>
+      <div class="stat-val exp" id="total-expense">Bs 0.00</div>
+    </div>
+  </div>
+
+  <!-- Balance proyectado -->
+  <div class="balance-card" style="margin-bottom:16px; text-align:center;">
+    <div class="card-label">Balance proyectado</div>
+    <div class="card-amount sm" id="projected-balance">Bs 0.00</div>
+    <div class="proj-diff zero" id="proj-diff">sin cambios</div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn a-income" onclick="setMode('income')" id="tab-income">+ Ingreso real</button>
+    <button class="tab-btn" onclick="setMode('expense')" id="tab-expense">− Gasto real</button>
+  </div>
+  <div class="tabs" style="margin-bottom:12px;">
+    <button class="tab-btn" onclick="setMode('pincome')" id="tab-pincome">↑ Ing. proyectado</button>
+    <button class="tab-btn" onclick="setMode('pexpense')" id="tab-pexpense">↓ Gas. proyectado</button>
+  </div>
+
+  <!-- Input -->
+  <div class="input-section">
+    <div class="input-row">
+      <input type="text" id="tx-name" placeholder="Descripción (ej: sueldo, alquiler)" />
+    </div>
+    <div class="input-row">
+      <input type="number" id="tx-amount" placeholder="0.00" min="0" step="0.01" inputmode="decimal" />
+      <button class="add-btn" onclick="addTx()">Añadir</button>
+    </div>
+  </div>
+
+  <!-- List -->
+  <div class="list-section">
+    <div class="list-header">
+      <span id="list-title">Ingresos registrados</span>
+      <span class="list-count" id="list-count">0</span>
+    </div>
+    <div class="tx-list" id="tx-list">
+      <div class="empty-msg">Sin registros aún</div>
+    </div>
+  </div>
+
+  <button class="clear-btn" onclick="clearAll()">Borrar todos los datos</button>
+
+</div>
+
+<script>
+  // Date
+  const now = new Date();
+  document.getElementById('header-date').textContent =
+    now.toLocaleDateString('es-BO', { day: 'numeric', month: 'short', year: 'numeric' });
+
+  // State — persisted in localStorage
+  let state = JSON.parse(localStorage.getItem('mifinanza') || '{"income":[],"expense":[],"pincome":[],"pexpense":[]}');
+  let mode = 'income';
+
+  const cfg = {
+    income:   { label: 'Ingresos registrados',    tabId: 'tab-income',   cls: 'a-income',   sign: '+', amtCls: 'inc' },
+    expense:  { label: 'Gastos registrados',       tabId: 'tab-expense',  cls: 'a-expense',  sign: '−', amtCls: 'exp' },
+    pincome:  { label: 'Ingresos proyectados',     tabId: 'tab-pincome',  cls: 'a-pincome',  sign: '+', amtCls: 'pinc' },
+    pexpense: { label: 'Gastos proyectados',       tabId: 'tab-pexpense', cls: 'a-pexpense', sign: '−', amtCls: 'pexp' },
+  };
+
+  function save() { localStorage.setItem('mifinanza', JSON.stringify(state)); }
+  function sum(arr) { return arr.reduce((a, b) => a + b.amount, 0); }
+  function fmt(n) {
+    return 'Bs ' + Math.abs(n).toLocaleString('es-BO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function setMode(m) {
+    mode = m;
+    Object.keys(cfg).forEach(k => {
+      document.getElementById(cfg[k].tabId).className = 'tab-btn' + (k === m ? ' ' + cfg[k].cls : '');
+    });
+    renderList();
+  }
+
+  function addTx() {
+    const name = document.getElementById('tx-name').value.trim();
+    const amt = parseFloat(document.getElementById('tx-amount').value);
+    if (!name || isNaN(amt) || amt <= 0) { shake(); return; }
+    state[mode].push({ id: Date.now(), name, amount: amt });
+    document.getElementById('tx-name').value = '';
+    document.getElementById('tx-amount').value = '';
+    save();
+    render();
+    document.getElementById('tx-name').focus();
+  }
+
+  function delTx(id) {
+    if (!confirm('¿Eliminar este registro?')) return;
+    state[mode] = state[mode].filter(t => t.id !== id);
+    save();
+    render();
+  }
+
+  function clearAll() {
+    if (!confirm('¿Borrar TODOS los datos? Esta acción no se puede deshacer.')) return;
+    state = { income: [], expense: [], pincome: [], pexpense: [] };
+    save();
+    render();
+  }
+
+  function shake() {
+    const inp = document.getElementById('tx-amount');
+    inp.style.borderColor = 'var(--red)';
+    setTimeout(() => inp.style.borderColor = '', 700);
+  }
+
+  function render() {
+    const totalInc = sum(state.income);
+    const totalExp = sum(state.expense);
+    const current = totalInc - totalExp;
+    const projected = current + sum(state.pincome) - sum(state.pexpense);
+    const diff = projected - current;
+
+    // Current balance
+    const cb = document.getElementById('current-balance');
+    cb.textContent = (current < 0 ? '−' : '') + fmt(current);
+    cb.className = 'card-amount' + (current > 0 ? ' pos' : current < 0 ? ' neg' : '');
+
+    document.getElementById('total-income').textContent = fmt(totalInc);
+    document.getElementById('total-expense').textContent = fmt(totalExp);
+
+    // Projected
+    const pb = document.getElementById('projected-balance');
+    pb.textContent = (projected < 0 ? '−' : '') + fmt(projected);
+    pb.className = 'card-amount sm' + (projected > 0 ? ' pos' : projected < 0 ? ' neg' : '');
+
+    const badge = document.getElementById('proj-diff');
+    if (diff > 0)      { badge.className = 'proj-diff pos'; badge.textContent = '+ ' + fmt(diff); }
+    else if (diff < 0) { badge.className = 'proj-diff neg'; badge.textContent = '− ' + fmt(Math.abs(diff)); }
+    else               { badge.className = 'proj-diff zero'; badge.textContent = 'sin cambios'; }
+
+    renderList();
+  }
+
+  function renderList() {
+    const c = cfg[mode];
+    const items = state[mode];
+    document.getElementById('list-title').textContent = c.label;
+    document.getElementById('list-count').textContent = items.length;
+    const list = document.getElementById('tx-list');
+    if (!items.length) {
+      list.innerHTML = '<div class="empty-msg">Sin registros aún</div>';
+      return;
+    }
+    list.innerHTML = items.map(t => `
+      <div class="tx-item">
+        <span class="tx-name">${escHtml(t.name)}</span>
+        <span class="tx-amount ${c.amtCls}">${c.sign} ${fmt(t.amount)}</span>
+        <span class="tx-del" onclick="delTx(${t.id})">✕</span>
+      </div>
+    `).join('');
+  }
+
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // Enter key support
+  document.getElementById('tx-amount').addEventListener('keydown', e => { if (e.key === 'Enter') addTx(); });
+  document.getElementById('tx-name').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('tx-amount').focus(); });
+
+  // Service worker registration
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
+
+  render();
+</script>
+</body>
+</html>
